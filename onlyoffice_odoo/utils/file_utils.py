@@ -1,6 +1,4 @@
-#
-# (c) Copyright Ascensio System SIA 2024
-#
+# Copyright (C) 2026 Ascensio System SIA
 
 import os
 
@@ -22,71 +20,52 @@ def get_file_ext(name):
 
 
 def get_file_type(context):
-    for format in format_utils.get_supported_formats():
-        if format.name == get_file_ext(context):
-            return format.type
+    for supported_format in format_utils.get_supported_formats():
+        if supported_format.name == get_file_ext(context):
+            return supported_format.type
 
     return None
 
 
 def can_view(context):
-    for format in format_utils.get_supported_formats():
-        if format.name == get_file_ext(context):
-            return True
+    for supported_format in format_utils.get_supported_formats():
+        if supported_format.name == get_file_ext(context):
+            if "view" in supported_format.actions:
+                return True
 
     return False
 
 
 def can_edit(context):
-    for format in format_utils.get_supported_formats():
-        if format.name == get_file_ext(context):
-            return format.edit
+    for supported_format in format_utils.get_supported_formats():
+        if supported_format.name == get_file_ext(context):
+            if "edit" in supported_format.actions:
+                return True
 
     return False
 
 
 def can_fill_form(context):
-    for format in format_utils.get_supported_formats():
-        if format.name == get_file_ext(context):
-            return format.fillForm
+    for supported_format in format_utils.get_supported_formats():
+        if supported_format.name == get_file_ext(context):
+            if "fill" in supported_format.actions:
+                return True
 
     return False
 
 
-def get_default_ext_by_type(str):
-    if str == "word":
-        return "docx"
-    if str == "cell":
-        return "xlsx"
-    if str == "slide":
-        return "pptx"
-    if str == "form":
-        return "docxf"
-
-    return None
-
-
-def get_default_name_by_type(str):
-    if str == "word":
-        return "Document"
-    if str == "cell":
-        return "Spreadsheet"
-    if str == "slide":
-        return "Presentation"
-    if str == "form":
-        return "Form template"
-
-    return None
-
-def get_mime_by_ext(str):
-    if str == "docx":
+def get_mime_by_ext(ext):
+    if ext == "docx":
         return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    if str == "xlsx":
+    if ext == "xlsx":
         return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    if str == "pptx":
+    if ext == "pptx":
         return "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    if ext == "pdf":
+        return "application/pdf"
 
     return None
+
 
 def get_default_file_template(lang, ext):
     locale_path = {
@@ -94,15 +73,21 @@ def get_default_file_template(lang, ext):
         "bg": "bg-BG",
         "cs": "cs-CZ",
         "de": "de-DE",
+        "default": "default",
         "el": "el-GR",
         "en-gb": "en-GB",
         "en": "en-US",
         "es": "es-ES",
+        "eu": "eu-ES",
+        "fi": "fi-FI",
         "fr": "fr-FR",
+        "gl": "gl-ES",
+        "he": "he-IL",
         "it": "it-IT",
         "ja": "ja-JP",
         "ko": "ko-KR",
         "lv": "lv-LV",
+        "nb": "nb-NO",
         "nl": "nl-NL",
         "pl": "pl-PL",
         "pt-br": "pt-BR",
@@ -110,9 +95,16 @@ def get_default_file_template(lang, ext):
         "ru": "ru-RU",
         "sk": "sk-SK",
         "sv": "sv-SE",
+        "tr": "tr-TR",
         "uk": "uk-UA",
         "vi": "vi-VN",
-        "zh": "zh-CN",
+        "zh-CN": "zh-CN",
+        "zh-TW": "zh-TW",
+        "ca": "ca-ES",
+        "da": "da-DK",
+        "hu": "hu-HU",
+        "id": "id-ID",
+        "ro": "ro-RO",
     }
 
     lang = lang.replace("_", "-")
@@ -122,9 +114,20 @@ def get_default_file_template(lang, ext):
         lang = lang.split("-")[0]
         locale = locale_path.get(lang)
         if locale is None:
-            locale = locale_path.get("en")
+            locale = locale_path.get("default")
 
-    file = open(os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "static", "assets", "document_templates", locale, "new." + ext), "rb")
+    file = open(
+        os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            "..",
+            "static",
+            "assets",
+            "document_templates",
+            locale,
+            "new." + ext,
+        ),
+        "rb",
+    )
 
     try:
         file_data = file.read()
